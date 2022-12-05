@@ -1,5 +1,7 @@
 from tkinter import messagebox
 from tkinter.font import BOLD
+
+import Productos
 from forms.master.form_master import MasterPanel
 from persistence.repository.auth_user_repository import AuthUserRepositroy
 import util.encoding_decoding as end_dec
