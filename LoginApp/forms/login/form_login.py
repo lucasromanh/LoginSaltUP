@@ -36,8 +36,11 @@ class FormLogin(FormLoginDesigner):
     def isPassword(self, password: str, user: Auth_User):
         b_password = end_dec.decrypt(user.password)
         if(password == b_password):
-            self.ventana.destroy()
-            MasterPanel()
+            if (user.rol == 'ROL_ADMIN'):
+                self.ventana.destroy()
+                MasterPanel()
+            else:
+                print('Rol de usuario')
         else:
             messagebox.showerror(
                 message="La contraseña no es correcta", title="Mensaje")

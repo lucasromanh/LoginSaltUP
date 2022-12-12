@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 class AuthUserRepositroy():
 
     def __init__(self):
-        self.engine = db.create_engine('sqlite:///db/login.sqlite',
+        self.engine = db.create_engine('sqlite:///db/py_final.db',#login.sqlite',
                                        echo=False, future=False)
 
     def getUserByUserName(self, user_name: str):

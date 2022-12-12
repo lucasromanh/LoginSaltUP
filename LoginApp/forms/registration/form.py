@@ -20,6 +20,7 @@ class FormRegister(FormRegisterDesigner):
 
             if not (self.isUserRegister(user_db)):
                 user.password = end_dec.encrypted(self.password.get())
+                user.rol = "ROL_USER"
                 self.auth_repository.insertUser(user)
                 messagebox.showinfo(
                     message="Se registro el usuario", title="Mensaje")     
