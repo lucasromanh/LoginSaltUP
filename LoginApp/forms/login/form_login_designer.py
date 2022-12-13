@@ -19,7 +19,7 @@ class FormLoginDesigner():
         self.ventana.resizable(width=0, height=0)
         utl.centrar_ventana(self.ventana, 800, 500)
 
-        logo = utl.leer_imagen("./imagenes/logo.png", (200, 200))
+        logo = utl.leer_imagen("./imagenes/Vertical Lockup on White Background.png", (200, 200))
         # frame_logo
         frame_logo = tk.Frame(self.ventana, bd=0, width=300,
                               relief=tk.SOLID, padx=10, pady=10, bg='#3a7ff6')

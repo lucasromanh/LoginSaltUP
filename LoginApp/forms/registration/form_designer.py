@@ -13,7 +13,7 @@ class FormRegisterDesigner():
         self.ventana.resizable(width=0, height=0)
         utl.centrar_ventana(self.ventana, 600, 450)
 
-        logo = utl.leer_imagen("./imagenes/logo.png", (128, 128))
+        logo = utl.leer_imagen("./imagenes/Horizontal Lockup on White Background.png", (128, 128))
         # frame_logo
         frame_logo = tk.Frame(self.ventana, bd=0, width=200,
                               relief=tk.SOLID, padx=10, pady=10, bg='#F87474')

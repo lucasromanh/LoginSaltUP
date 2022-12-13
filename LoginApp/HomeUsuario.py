@@ -1,18 +1,24 @@
-from tkinter import ttk
-from tkinter import *
-
 import sqlite3
-import db
+from tkinter import CENTER, E, END, W, Button, Entry, Label, LabelFrame, StringVar, Tk, Toplevel, ttk
+from tkinter.font import BOLD
 
-class Productos:
-    
-    bd_nombre ='py_final.db'
-    
-    def __init__(self, window):
-        self.wind = window
-        self.wind.title('SUPERMARK - PRODUCTOS')
+from Producto import Producto
+from Ticket import Ticket
+
+class HomeUsuario:                  
+    def __init__(self, id): 
+        self.bd_nombre = 'db/py_final.db'
+        self.id_cliente = id 
+        self.carrito = []
+        self.wind = Tk()
+        self.wind.title('SUPERMARK - CLIENTE')
+        w, h = 700, 700#self.wind.winfo_screenwidth(), self.wind.winfo_screenheight()                                    
+        self.wind.geometry("%dx%d+0+0" % (w, h))
+        self.wind.config(bg='#fcfcfc')
+        self.wind.resizable(width=0, height=0) 
         
         # Contenedor productos
+        """
         frame = LabelFrame(self.wind, text = 'Registra un Producto nuevo')
         frame.grid(row = 0, column = 0, columnspan = 3, pady = 20)
     
@@ -35,7 +41,7 @@ class Productos:
         
         self.mensaje = Label(text = '', fg = 'red')
         self.mensaje.grid(row = 3, column = 0, columnspan =2, sticky = W + E)
-        
+        """
         #Tabla
         self.tree = ttk.Treeview(height = 10, column = 2)
         self.tree.grid(row = 4, column = 0, columnspan = 2)
@@ -43,13 +49,62 @@ class Productos:
         self.tree.heading('#1', text = 'Precio', anchor = CENTER)
         
         #Botones de carga
-        
+        """
         ttk.Button(text = 'Eliminar', command = self.eliminar_productos).grid(row = 5, column = 0, sticky = W + E)
         ttk.Button(text = 'Editar', command = self.editor_productos).grid(row = 5, column = 1, sticky = W + E)
-        
+        """
+        ttk.Button(text= 'Agregar al carrito', command= self.agregar_a_carrito).grid(row = 5, columnspan =2, sticky = W + E)
         #llenando filas
         self.traer_productos()
+
+        #testo
+        frame = LabelFrame(self.wind, text = 'Carrito')
+        frame.grid(row = 3, column = 0, columnspan = 3, pady = 20)
+        # tabla carrito
+        self.tree2 = ttk.Treeview(column = ("c1", "c2", "c3"), show='headings', height = 10)
+        self.tree2.grid(row = 10, column = 0, columnspan = 2)
+        self.tree2.heading('c1', text = 'Nombre', anchor = CENTER)
+        self.tree2.heading('c2', text = 'Precio', anchor = CENTER)
+        self.tree2.heading("c3", text= 'Cantidad', anchor = CENTER)
+
+        ttk.Button(text='Finalizar compra', command=self.ir_ticket).grid(row=20, columnspan =2, sticky = W + E)
+
     
+    def ir_ticket(self):
+        self.wind.destroy()
+        Ticket(self.carrito, self.id_cliente)
+
+    def agregar_a_carrito(self):
+        item = self.tree.focus()
+        print(self.tree.item(item))
+        if (self.frecuencia(self.tree.item(item)['text']) == 0):
+            producto = Producto(self.tree.item(item)['text'], self.tree.item(item)['values'], 1)
+            self.carrito.append(producto)
+        else:
+            indice = self.get_index(self.tree.item(item)['text'])
+            self.carrito[indice].cantidad += 1
+        self.mostrar_carrito()
+
+    def get_index(self,nombre):
+        for indice in range(len(self.carrito)):
+            if (self.carrito[indice].nombre == nombre):
+                return indice
+
+    def frecuencia(self,nombre):
+        contador = 0
+        for elemento in self.carrito:
+            if (elemento.nombre == nombre):
+                contador += 1
+        return contador
+
+    def mostrar_carrito(self):
+        records = self.tree2.get_children()
+        for elemento in records:
+            self.tree2.delete(elemento)
+        for row in self.carrito:
+            self.tree2.insert('', 0 , text = row.nombre, values=(row.nombre, row.precio, row.cantidad))
+
+
     def ejecuta_consulta(self, query, parameters = ()):
         with sqlite3.connect(self.bd_nombre) as conn: 
             cursor = conn.cursor()
@@ -60,21 +115,25 @@ class Productos:
     def traer_productos(self):
         #limpiando tabla
         records = self.tree.get_children()
+        print(records)
         for element in records:
             self.tree.delete(element)
         #Consultando datos
-        query = 'SELECT * FROM Producto ORDER BY Nombre DESC'
+        query = 'SELECT * FROM Producto ORDER BY nombre DESC'
         db_filas = self.ejecuta_consulta(query)
         for row in db_filas:
-            self.tree.insert('', 0 , text = row[1], value = row[2])
+            print(row)
+            self.tree.insert('', 0 , text = row[1], value = row[3])
     
     def validacion(self):
         return len(self.name.get()) !=0 and len(self.price.get()) !=0  
     
     def agregar_productos(self):
         if self.validacion():
-            query ='INSERT INTO Producto VALUES (Null, ?, ?)'
-            parameters = (self.name.get(), self.price.get())
+            #query ='INSERT INTO Producto VALUES (Null, ?, ?)'
+            #parameters = (self.name.get(), self.price.get())
+            query ='INSERT INTO Producto VALUES (NULL, ?, ?, ?, ?)'
+            parameters = (self.name.get(), 10, self.price.get(), 1)
             self.ejecuta_consulta(query, parameters)
             self.mensaje['text'] = 'El Producto {} ha sido agregado de forma satisfactoria'.format (self.name.get())
             self.name.delete(0, END)
@@ -91,7 +150,7 @@ class Productos:
             self.mensaje['text'] = 'Selecciona un elemento o fila'
             return
         name=self.tree.item(self.tree.selection())['text']
-        query = 'DELETE FROM Producto WHERE Nombre = ?'
+        query = 'DELETE FROM Producto WHERE nombre = ?'
         self.ejecuta_consulta(query, (name,))
         self.mensaje['text'] = 'El producto {} ha sido eliminado de forma correcta'.format(name)
         self.traer_productos()
@@ -130,16 +189,9 @@ class Productos:
         Button (self.edit_wind, text = 'Actualizar', command = lambda: self.edit_records(nombre_nuevo.get(), name, precio_nuevo.get(), precio_viejo)).grid(row = 4, column =2, sticky = W)
         
     def edit_records(self, nombre_nuevo, name, precio_nuevo, precio_viejo):
-        query = 'UPDATE Producto SET Nombre = ?, Precio = ? WHERE Nombre = ? AND Precio = ?'
+        query = 'UPDATE Producto SET nombre = ?, precio = ? WHERE nombre = ? AND precio = ?'
         parameters =(nombre_nuevo, precio_nuevo, name, precio_viejo)
         self.ejecuta_consulta(query, parameters)
         self.edit_wind.destroy()
         self.mensaje['text'] = 'El {} ha sido actualizado correctramente'.format(name)
         self.traer_productos()
-           
-    
-if __name__ == '__main__':
-    windoww = Tk()
-    aplicacion = Productos(windoww)
-    windoww.mainloop()
-    

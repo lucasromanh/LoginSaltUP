@@ -68,7 +68,7 @@ class MasterPanel:
         query = 'SELECT * FROM Producto ORDER BY nombre DESC'
         db_filas = self.ejecuta_consulta(query)
         for row in db_filas:
-            self.tree.insert('', 0 , text = row[1], value = row[2])
+            self.tree.insert('', 0 , text = row[1], value = row[3])
     
     def validacion(self):
         return len(self.name.get()) !=0 and len(self.price.get()) !=0  
@@ -82,7 +82,8 @@ class MasterPanel:
             self.ejecuta_consulta(query, parameters)
             self.mensaje['text'] = 'El Producto {} ha sido agregado de forma satisfactoria'.format (self.name.get())
             self.name.delete(0, END)
-            self.price.delet(0, END)
+            self.price.delete(0, END)
+            self.traer_productos()
         else:
             self.mensaje['text'] = 'El Nombre y el Precio son requeridos'
             self.traer_productos()

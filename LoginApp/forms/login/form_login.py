@@ -1,7 +1,8 @@
 from tkinter import messagebox
 from tkinter.font import BOLD
+from HomeUsuario import HomeUsuario
 
-import Productos
+import Producto
 from forms.master.form_master import MasterPanel
 from persistence.repository.auth_user_repository import AuthUserRepositroy
 import util.encoding_decoding as end_dec
@@ -37,10 +38,11 @@ class FormLogin(FormLoginDesigner):
         b_password = end_dec.decrypt(user.password)
         if(password == b_password):
             if (user.rol == 'ROL_ADMIN'):
-                self.ventana.destroy()
+                self.ventana.destroy()               
                 MasterPanel()
             else:
-                print('Rol de usuario')
+                self.ventana.destroy()
+                HomeUsuario(user.id)
         else:
             messagebox.showerror(
                 message="La contraseña no es correcta", title="Mensaje")
