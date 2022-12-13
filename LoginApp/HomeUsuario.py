@@ -3,7 +3,7 @@ from tkinter import CENTER, E, END, W, Button, Entry, Label, LabelFrame, StringV
 from tkinter.font import BOLD
 
 from Producto import Producto
-from Ticket import Ticket
+from Ticket import *
 
 class HomeUsuario:                  
     def __init__(self, id): 
@@ -16,6 +16,7 @@ class HomeUsuario:
         self.wind.geometry("%dx%d+0+0" % (w, h))
         self.wind.config(bg='#fcfcfc')
         self.wind.resizable(width=0, height=0) 
+        self.nueva_cantidad = 0
         
         # Contenedor productos
         """
@@ -66,10 +67,65 @@ class HomeUsuario:
         self.tree2.heading('c1', text = 'Nombre', anchor = CENTER)
         self.tree2.heading('c2', text = 'Precio', anchor = CENTER)
         self.tree2.heading("c3", text= 'Cantidad', anchor = CENTER)
-
-        ttk.Button(text='Finalizar compra', command=self.ir_ticket).grid(row=20, columnspan =2, sticky = W + E)
+        ttk.Button(text='Eliminar de carrito', command=self.eliminar_de_carrito).grid(row=15, columnspan =2, sticky = W + E)
+        ttk.Button(text='Modificar Cantidad', command=self.modificar_cantidad).grid(row=20, columnspan =2, sticky = W + E)
+        ttk.Button(text='Finalizar compra', command=self.ir_ticket).grid(row=25, columnspan =2, sticky = W + E)
 
     
+    def ventana_editor(self):
+        try:
+            self.tree.item(self.tree2.selection())['text'] [0]
+        except IndexError as e:
+            self.mensaje['text'] = 'Selecciona un elemento o fila'
+            return
+        name = self.tree2.item(self.tree2.selection())['text']    
+        cantidad_vieja = self.tree2.item(self.tree2.selection())['values'][2]
+        self.edit_wind = Toplevel()
+        self.edit_wind.title = 'Editar Producto'
+
+        
+        #Precio Viejo
+        Label(self.edit_wind, text = 'Cantidad actual').grid(row = 2, column = 1)
+        Entry(self.edit_wind, textvariable = StringVar(self.edit_wind, value = cantidad_vieja), state = 'readonly').grid(row = 2, column = 2)
+        
+        
+        #Precio Nuevo
+        Label(self.edit_wind, text = 'Nueva cantidad').grid(row = 3, column = 1)
+        cantidad_nueva = Entry(self.edit_wind)
+        cantidad_nueva.grid(row = 3, column = 2)
+        
+        #Boton de actualizar nombre y precios
+        Button (self.edit_wind, text = 'Actualizar', command = lambda: self.edit_rec(cantidad_nueva.get())).grid(row = 4, column =2, sticky = W)
+        
+
+    def edit_rec(self, cantidad_nueva):
+        self.nueva_cantidad = cantidad_nueva
+        self.edit_wind.destroy()
+
+    def modificar_cantidad(self):
+        self.ventana_editor()
+        item = self.tree2.focus()
+        self.tree2.item(item)['values'][2] = self.nueva_cantidad
+        for indice in self.carrito:
+            if self.carrito[indice].nombre == self.tree2.item(item)['text']:
+                self.carrito[indice].cantidad = self.nueva_cantidad 
+        self.mostrar_carrito()
+
+    def eliminar_de_carrito(self):
+        item = self.tree2.focus()
+        i = 0
+        encontrado = False
+        while (i < len(self.carrito) and not encontrado):
+            if (self.carrito[i].nombre == self.tree2.item(item)['text']):
+                encontrado = True
+                del self.carrito[i]
+            else:
+                i += 1
+        
+        
+        print(len(self.carrito))
+        self.mostrar_carrito()
+
     def ir_ticket(self):
         self.wind.destroy()
         Ticket(self.carrito, self.id_cliente)
